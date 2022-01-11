@@ -1,4 +1,4 @@
-import { convertImage } from "panorama-to-cubemap";
+import { convertImage, createConvertFrame } from "panorama-to-cubemap";
 
 export default class WebCube360 {
   constructor (gl, mode, sourcePath, onload) {
@@ -14,6 +14,8 @@ export default class WebCube360 {
       return this.setSingleTex(sourcePath);
     } else if (mode === 'cube') {
       return this.setCubeTex(sourcePath);
+    } else if (mode === 'cubemovie') {
+      return this.setCubeMovieTex(sourcePath);
     }
     if (onload !== undefined) this.onload = onload;
   }
@@ -48,7 +50,7 @@ export default class WebCube360 {
             }
           };
           data.onerror = (e) => {
-            reject();
+            reject(e);
           }
           data.src = sourcePath[i];
           cImg.push({ data, });
@@ -59,7 +61,7 @@ export default class WebCube360 {
           rotation: 180,
           interpolation: "lanczos",
           outformat: "jpg",
-          width: 32
+          width: 256
         };
         convertImage(url, options).then(canvases => {
           canvases.forEach(c => {
@@ -71,6 +73,33 @@ export default class WebCube360 {
       }
     });
   }
+  setCubeMovieTex (sourcePath) {
+    return new Promise(async (resolve) => {
+      const cImg = [];
+      if (typeof sourcePath === 'string' || sourcePath instanceof String) {
+        const url = sourcePath;
+        const options = {
+          rotation: 180,
+          interpolation: "lanczos",
+          outformat: "jpg",
+          width: 512
+        };
+        const convertFrame = await createConvertFrame(url, options);
+        const loopSetter = () => {
+          convertFrame().then(canvases => {
+            canvases.forEach(c => {
+              cImg.push({ data: c });
+            });
+            this.generateCubeMap(cImg);
+          });
+        };
+        this.intervalFunc = setInterval(loopSetter, 1000 / 15);
+        resolve();
+      }
+    });
+  }
+
+
   callLoaddedCheck (cImg) {
     return cImg[0].imageDataLoaded &&
       cImg[1].imageDataLoaded &&

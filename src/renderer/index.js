@@ -4,7 +4,8 @@ import { torus, cube, } from './element';
 import WebCube360 from './WebCube360';
 import vs from './vertex.vs';
 import fs from './fragment.fs';
-import panorama from '../../img/panorama-min.jpg';
+import panorama from '../../img/panorama.jpg';
+import snowboard from '../../img/panorama-snowboard.mp4';
 import PZ from '../../img/cube_PZ.png';
 import NZ from '../../img/cube_NZ.png';
 import PX from '../../img/cube_PX.png';
@@ -95,10 +96,10 @@ const render = (gl) => {
 
   // キューブマップ用イメージのソースを配列に格納
   // const cubeSourse = [PZ, NZ, PX, NX, PY, NY];
-  const cubeSourse = panorama;
+  const cubeSourse = snowboard;
 
   // キューブマップテクスチャの生成
-  const cubeMap = new WebCube360(gl, 'cube', cubeSourse);
+  const cubeMap = new WebCube360(gl, 'cubemovie', cubeSourse);
 
   // 視点座標
   let eyePosition = [0.0, 0.0, 20.0];
@@ -160,7 +161,7 @@ const render = (gl) => {
     gl.flush();
 
   };
-  setInterval(loop, 1000 / 30);
+  setInterval(loop, 1000 / 15);
 };
 
 export default render;
